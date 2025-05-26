@@ -1,0 +1,147 @@
+name: Step 1, Copilot Extension in a Codespace
+
+# This step triggers after push to main#devcontainer.json.
+# This workflow updates from step 1 to step 2.
+
+# This will run every time we main#devcontainer.json
+# Reference: https://docs.github.com/en/actions/learn-github-actions/events-that-trigger-workflows
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".devcontainer/devcontainer.json"
+    branches:
+      - main
+
+# Reference: https://docs.github.com/en/actions/security-guides/automatic-token-authentication
+permissions:
+  # Need `contents: read` to checkout the repository.
+  # Need `contents: write` to update the step metadata.
+  contents: write
+
+jobs:
+  # The purpose of this job is to output the current step number
+  # (retreived from the step file). This output variable can
+  # then be referenced in other jobs and used in conditional.
+  # expressions.
+  get_current_step:
+    name: Check current step number
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - id: get_step
+        run: echo "current_step=$(cat ./.github/steps/-step.txt)" >> $GITHUB_OUTPUT
+    outputs:
+      current_step: ${{ steps.get_step.outputs.current_step }}
+
+  on_add_devcontainer:
+    name: On Add Devcontainer
+    needs: get_current_step
+
+    # We will only run this action when:
+    # 1. This repository isn't the template repository.
+    # Reference: https://docs.github.com/en/actions/learn-github-actions/contexts
+    # Reference: https://docs.github.com/en/actions/learn-github-actions/expressions
+    if: ${{ !github.event.repository.is_template && needs.get_current_step.outputs.current_step == 1 }}
+
+    # We'll run Ubuntu for performance instead of Mac or Windows.
+    runs-on: ubuntu-latest
+
+    steps:
+      # We'll need to check out the repository so that we can edit the README.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Verify the learner added the file contents.
+      - name: Check workflow contents, jobs
+      import pygame
+import os
+
+# Initialisation de Pygame
+pygame.init()
+
+# Définition de la fenêtre
+screen = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("Bugtopy - Explore le monde des insectes !")
+
+# Couleurs et polices
+GREEN = (180, 255, 180)
+GRAY = (200, 200, 200)
+font = pygame.font.Font(None, 40)
+
+# Chargement des images des insectes (grisés s'ils ne sont pas encore trouvés)
+insects = [
+    {"name": "Criquet migrateur", "latin": "Locusta migratoria", "image": "criquet_migrateur.png", "found": False},
+    {"name": "Cigale commune", "latin": "Cicada orni", "image": "cigale_commune.png", "found": False},
+    {"name": "Mouche domestique", "latin": "Musca domestica", "image": "mouche_domestique.png", "found": False},
+    {"name": "Phasme bâton", "latin": "Clonopsis gallica", "image": "phasme_baton.png", "found": False},
+    {"name": "Piéride du chou", "latin": "Pieris brassicae", "image": "pieride_du_chou.png", "found": False},
+]
+
+# Vérifier si les fichiers image existent et activer leur découverte
+for insect in insects:
+    if os.path.exists(insect["image"]):
+        insect["found"] = True
+        insect["img"] = pygame.image.load(insect["image"])
+    else:
+        insect["img"] = pygame.Surface((100, 100))
+        insect["img"].fill(GRAY)
+
+# Fonction affichant l’InsectoBook
+def show_insectobook():
+    screen.fill(GREEN)
+    y_position = 50
+
+    for insect in insects:
+        screen.blit(insect["img"], (50, y_position))  # Affichage de l'image
+        text_name = font.render(insect["name"] if insect["found"] else "???", True, (0, 0, 0))
+        text_latin = font.render(insect["latin"] if insect["found"] else "???", True, (100, 100, 100))
+        screen.blit(text_name, (200, y_position + 10))
+        screen.blit(text_latin, (200, y_position + 40))
+        y_position += 120
+
+    pygame.display.update()
+
+# Affichage de l’écran d’accueil avec des boutons
+def show_main_menu():
+    screen.fill(GREEN)
+    title = font.render("Bugtopy", True, (0, 50, 0))
+    screen.blit(title, (300, 50))
+
+    buttons = [
+        {"text": "InsectoBook", "pos": (300, 150)},
+        {"text": "Scanner d'Insectes", "pos": (300, 250)},
+        {"text": "Combat", "pos": (300, 350)},
+        {"text": "Carte", "pos": (300, 450)},
+    ]
+
+    for button in buttons:
+        btn_rect = pygame.Rect(button["pos"][0], button["pos"][1], 200, 50)
+        pygame.draw.rect(screen, (50, 150, 50), btn_rect)
+        btn_text = font.render(button["text"], True, (255, 255, 255))
+        screen.blit(btn_text, (button["pos"][0] + 20, button["pos"][1] + 10))
+
+    pygame.display.update()
+
+# Boucle principale du jeu
+running = True
+menu_active = True
+
+while running:
+    if menu_active:
+        show_main_menu()
+    else:
+        show_insectobook()
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            x, y = event.pos
+            if 300 <= x <= 500 and 150 <= y <= 200:
+                menu_active = False  # Ouvre l’InsectoBook
+
+pygame.quit()
+
+        
